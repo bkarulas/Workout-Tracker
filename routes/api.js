@@ -1,12 +1,13 @@
 const router = require("express").Router();
-const Workout = require("../models/workout.js");
+const db = require("../models");
+const mongo = require('mongojs');
 
 
 
 
 
 router.get("/api/workouts", (req, res) => {
-  Workout.find()
+  db.Workout.find({})
   .then(dbWorkouts => {
     res.json(dbWorkouts);
   }).catch(err => {
@@ -15,7 +16,7 @@ router.get("/api/workouts", (req, res) => {
 });
 
 router.post("/api/workouts", (req, res) => {
-  Workout.create({})
+  db.Workout.create({})
   .then(dbWorkouts => {
     res.json(dbWorkouts);
   }).catch(err => {
@@ -23,11 +24,8 @@ router.post("/api/workouts", (req, res) => {
   })
 });
 
-router.put("/api/workouts/:id", ({body, params}, res) => {
-  Workout.findByIdAndUpdate(
-    params.id, 
-    { $push: { exercises: body } }, 
-    { new: true, runValidators: true }
+router.put("/api/workouts/:id", (req, res) => {
+  db.Workout.updateOne({_id: mongo.ObjectID(req.params.id)},{$push:{exercises:req.body}}
   ).then(dbworkouts => {
     res.json(dbworkouts);
   }).catch(err => {
@@ -36,19 +34,10 @@ router.put("/api/workouts/:id", ({body, params}, res) => {
 })
 
 
-router.get("/api/workouts/range", ({ query }, res) => {
-  Workout.find( { day: { $gte: query.start, $lte: query.end } })
+router.get("/api/workouts/range", (req, res) => {
+  db.Workout.find({})
   .then(dbworkouts => {
     res.json(dbworkouts);
-  }).catch(err => {
-    res.json(err)
-  })
-})
-
-router.delete("/api/workouts", ({ body }, res) => {
-  Workout.findByIdAndDelete(body.id)
-  .then(() => {
-    res.json(true)
   }).catch(err => {
     res.json(err)
   })
